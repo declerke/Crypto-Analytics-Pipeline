@@ -1,0 +1,85 @@
+version: 2
+
+models:
+  - name: fct_crypto_candles
+    description: >
+      Fact table of OHLCV candlestick records enriched with derived price metrics.
+      One row per symbol per candle interval (default 1-minute).
+    columns:
+      - name: candle_id
+        description: MD5 surrogate key on symbol + open_time epoch.
+        tests:
+          - not_null
+          - unique
+      - name: symbol
+        tests:
+          - not_null
+      - name: open_time
+        tests:
+          - not_null
+      - name: close_price
+        tests:
+          - not_null
+      - name: candle_direction
+        description: bullish if close >= open, bearish otherwise.
+        tests:
+          - not_null
+          - accepted_values:
+              values: ['bullish', 'bearish']
+
+  - name: fct_crypto_trades
+    description: Fact table of individual trade executions enriched with trade side and value.
+    columns:
+      - name: trade_key
+        description: MD5 surrogate key on symbol + trade_id.
+        tests:
+          - not_null
+          - unique
+      - name: symbol
+        tests:
+          - not_null
+      - name: trade_time
+        tests:
+          - not_null
+      - name: trade_side
+        tests:
+          - accepted_values:
+              values: ['buy', 'sell']
+
+  - name: dim_symbols
+    description: >
+      Current-state dimension for each tracked trading pair derived from
+      the latest 24-hour ticker snapshot. One row per symbol.
+    columns:
+      - name: symbol
+        tests:
+          - not_null
+          - unique
+      - name: last_price
+        tests:
+          - not_null
+
+  - name: mart_daily_market_summary
+    description: >
+      Analytics-ready daily summary table. Answers all five key business questions:
+      daily average price, highest volume symbol, hourly volatility (via daily_volatility_pct),
+      largest price movement, and 7-day rolling average price.
+    columns:
+      - name: symbol
+        tests:
+          - not_null
+      - name: trade_date
+        tests:
+          - not_null
+      - name: avg_close_price
+        description: Mean closing price across all 1-minute candles in the day.
+        tests:
+          - not_null
+      - name: rolling_7day_avg_price
+        description: 7-day rolling average of avg_close_price using a window of up to 6 preceding days.
+      - name: volume_rank_on_day
+        description: Rank of the symbol by total_base_volume within the same calendar day (1 = highest volume).
+      - name: daily_volatility_pct
+        description: Intra-day high-low range as a percentage of the daily low.
+      - name: daily_price_change_pct
+        description: Day open-to-close price change percentage.

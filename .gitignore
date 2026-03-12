@@ -1,0 +1,34 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+ENV/
+build/
+dist/
+
+# Environment Variables
+.env
+!.env.example
+
+# dbt
+target/
+dbt_packages/
+logs/
+dbt_modules/
+
+# Docker
+.docker-data/
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+
+# OS
+.DS_Store
+Thumbs.db
+
+check_env.py
+dirlist.txt

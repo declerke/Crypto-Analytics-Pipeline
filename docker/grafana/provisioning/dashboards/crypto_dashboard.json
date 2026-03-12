@@ -1,0 +1,177 @@
+{
+  "__inputs": [],
+  "__elements": {},
+  "__requires": [
+    { "type": "grafana", "id": "grafana", "name": "Grafana", "version": "10.0.0" },
+    { "type": "datasource", "id": "postgres", "name": "PostgreSQL", "version": "1.0.0" },
+    { "type": "panel", "id": "timeseries", "name": "Time series", "version": "" },
+    { "type": "panel", "id": "table", "name": "Table", "version": "" },
+    { "type": "panel", "id": "bargauge", "name": "Bar gauge", "version": "" }
+  ],
+  "annotations": {
+    "list": [{ "builtIn": 1, "datasource": { "type": "grafana", "uid": "-- Grafana --" }, "enable": true, "hide": true, "iconColor": "rgba(0, 211, 255, 1)", "name": "Annotations & Alerts", "type": "dashboard" }]
+  },
+  "description": "Crypto Market Analytics Pipeline — Binance API + PostgreSQL + dbt",
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 1,
+  "id": null,
+  "links": [],
+  "panels": [
+    {
+      "datasource": { "type": "postgres", "uid": "crypto_pg_ds" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "palette-classic" },
+          "custom": { "axisCenteredZero": false, "axisColorMode": "text", "axisLabel": "Price (USDT)", "axisPlacement": "auto", "barAlignment": 0, "drawStyle": "line", "fillOpacity": 10, "gradientMode": "none", "hideFrom": { "legend": false, "tooltip": false, "viz": false }, "lineInterpolation": "smooth", "lineWidth": 2, "pointSize": 5, "scaleDistribution": { "type": "linear" }, "showPoints": "never", "spanNulls": false, "stacking": { "group": "A", "mode": "none" }, "thresholdsStyle": { "mode": "off" } },
+          "mappings": [],
+          "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }] },
+          "unit": "currencyUSD"
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 9, "w": 24, "x": 0, "y": 0 },
+      "id": 1,
+      "options": { "legend": { "calcs": ["mean", "max", "min"], "displayMode": "table", "placement": "bottom", "showLegend": true }, "tooltip": { "mode": "multi", "sort": "none" } },
+      "targets": [
+        {
+          "datasource": { "type": "postgres", "uid": "crypto_pg_ds" },
+          "editorMode": "code",
+          "format": "time_series",
+          "rawQuery": true,
+          "rawSql": "SELECT\n  trade_date AS time,\n  symbol AS metric,\n  avg_close_price AS value\nFROM analytics_marts.mart_daily_market_summary\nWHERE trade_date >= NOW() - INTERVAL '30 days'\nORDER BY trade_date ASC",
+          "refId": "A",
+          "sql": { "columns": [], "groupBy": [], "limit": 50 }
+        }
+      ],
+      "title": "Daily Average Close Price per Coin",
+      "type": "timeseries"
+    },
+    {
+      "datasource": { "type": "postgres", "uid": "crypto_pg_ds" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "mappings": [],
+          "thresholds": { "mode": "absolute", "steps": [{ "color": "blue", "value": null }, { "color": "green", "value": 1000 }] },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 9 },
+      "id": 2,
+      "options": { "displayMode": "gradient", "minVizHeight": 10, "minVizWidth": 0, "orientation": "horizontal", "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false }, "showUnfilled": true, "text": {} },
+      "targets": [
+        {
+          "datasource": { "type": "postgres", "uid": "crypto_pg_ds" },
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT\n  symbol,\n  SUM(total_base_volume) AS total_volume\nFROM analytics_marts.mart_daily_market_summary\nWHERE trade_date >= NOW() - INTERVAL '7 days'\nGROUP BY symbol\nORDER BY total_volume DESC",
+          "refId": "A"
+        }
+      ],
+      "title": "Highest Trading Volume (Last 7 Days)",
+      "type": "bargauge"
+    },
+    {
+      "datasource": { "type": "postgres", "uid": "crypto_pg_ds" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "palette-classic" },
+          "custom": { "axisCenteredZero": false, "axisColorMode": "text", "axisLabel": "Volatility %", "axisPlacement": "auto", "barAlignment": 0, "drawStyle": "bars", "fillOpacity": 60, "gradientMode": "none", "hideFrom": { "legend": false, "tooltip": false, "viz": false }, "lineInterpolation": "linear", "lineWidth": 1, "pointSize": 5, "scaleDistribution": { "type": "linear" }, "showPoints": "never", "spanNulls": false, "stacking": { "group": "A", "mode": "none" }, "thresholdsStyle": { "mode": "off" } },
+          "mappings": [],
+          "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }] },
+          "unit": "percent"
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 9 },
+      "id": 3,
+      "options": { "legend": { "calcs": ["mean", "max"], "displayMode": "table", "placement": "bottom", "showLegend": true }, "tooltip": { "mode": "multi", "sort": "desc" } },
+      "targets": [
+        {
+          "datasource": { "type": "postgres", "uid": "crypto_pg_ds" },
+          "editorMode": "code",
+          "format": "time_series",
+          "rawQuery": true,
+          "rawSql": "SELECT\n  trade_hour AS time,\n  symbol     AS metric,\n  volatility_pct AS value\nFROM analytics_intermediate.int_price_metrics\nWHERE trade_hour >= NOW() - INTERVAL '48 hours'\nORDER BY trade_hour ASC",
+          "refId": "A"
+        }
+      ],
+      "title": "Hourly Price Volatility per Coin (High-Low %)",
+      "type": "timeseries"
+    },
+    {
+      "datasource": { "type": "postgres", "uid": "crypto_pg_ds" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "custom": { "align": "auto", "cellOptions": { "type": "auto" }, "inspect": false },
+          "mappings": [],
+          "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }, { "color": "red", "value": 80 }] }
+        },
+        "overrides": [
+          { "matcher": { "id": "byName", "options": "daily_price_change_pct" }, "properties": [{ "id": "unit", "value": "percent" }, { "id": "custom.cellOptions", "value": { "mode": "gradient", "type": "color-background" } }, { "id": "thresholds", "value": { "mode": "absolute", "steps": [{ "color": "red", "value": null }, { "color": "green", "value": 0 }] } }] },
+          { "matcher": { "id": "byName", "options": "daily_price_range" }, "properties": [{ "id": "unit", "value": "currencyUSD" }] },
+          { "matcher": { "id": "byName", "options": "daily_high" }, "properties": [{ "id": "unit", "value": "currencyUSD" }] },
+          { "matcher": { "id": "byName", "options": "daily_low" }, "properties": [{ "id": "unit", "value": "currencyUSD" }] }
+        ]
+      },
+      "gridPos": { "h": 8, "w": 24, "x": 0, "y": 17 },
+      "id": 4,
+      "options": { "cellHeight": "sm", "footer": { "countRows": false, "fields": "", "reducer": ["sum"], "show": false }, "showHeader": true, "sortBy": [{ "desc": true, "displayName": "daily_price_range" }] },
+      "targets": [
+        {
+          "datasource": { "type": "postgres", "uid": "crypto_pg_ds" },
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT\n  trade_date,\n  symbol,\n  daily_high,\n  daily_low,\n  daily_price_range,\n  daily_price_change_pct,\n  daily_volatility_pct\nFROM analytics_marts.mart_daily_market_summary\nWHERE trade_date >= NOW() - INTERVAL '7 days'\nORDER BY daily_price_range DESC\nLIMIT 50",
+          "refId": "A"
+        }
+      ],
+      "title": "Largest Price Movements (Daily Range, Last 7 Days)",
+      "type": "table"
+    },
+    {
+      "datasource": { "type": "postgres", "uid": "crypto_pg_ds" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "palette-classic" },
+          "custom": { "axisCenteredZero": false, "axisColorMode": "text", "axisLabel": "Price (USDT)", "axisPlacement": "auto", "barAlignment": 0, "drawStyle": "line", "fillOpacity": 5, "gradientMode": "none", "hideFrom": { "legend": false, "tooltip": false, "viz": false }, "lineInterpolation": "smooth", "lineStyle": { "dash": [10, 10], "fill": "dash" }, "lineWidth": 2, "pointSize": 5, "scaleDistribution": { "type": "linear" }, "showPoints": "auto", "spanNulls": false, "stacking": { "group": "A", "mode": "none" }, "thresholdsStyle": { "mode": "off" } },
+          "mappings": [],
+          "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }] },
+          "unit": "currencyUSD"
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 9, "w": 24, "x": 0, "y": 25 },
+      "id": 5,
+      "options": { "legend": { "calcs": ["lastNotNull"], "displayMode": "table", "placement": "bottom", "showLegend": true }, "tooltip": { "mode": "multi", "sort": "none" } },
+      "targets": [
+        {
+          "datasource": { "type": "postgres", "uid": "crypto_pg_ds" },
+          "editorMode": "code",
+          "format": "time_series",
+          "rawQuery": true,
+          "rawSql": "SELECT\n  trade_date AS time,\n  symbol     AS metric,\n  rolling_7day_avg_price AS value\nFROM analytics_marts.mart_daily_market_summary\nWHERE trade_date >= NOW() - INTERVAL '30 days'\n  AND rolling_7day_avg_price IS NOT NULL\nORDER BY trade_date ASC",
+          "refId": "A"
+        }
+      ],
+      "title": "7-Day Rolling Average Price Trend",
+      "type": "timeseries"
+    }
+  ],
+  "refresh": "30s",
+  "schemaVersion": 38,
+  "tags": ["crypto", "binance", "dbt", "elt"],
+  "templating": { "list": [] },
+  "time": { "from": "now-7d", "to": "now" },
+  "timepicker": {},
+  "timezone": "utc",
+  "title": "Crypto Market Analytics Pipeline",
+  "uid": "crypto-market-analytics",
+  "version": 1,
+  "weekStart": ""
+}

@@ -1,0 +1,32 @@
+version: 2
+
+models:
+  - name: int_price_metrics
+    description: Hourly OHLCV aggregates and volatility metrics per symbol, derived from staged klines.
+    columns:
+      - name: symbol
+        tests:
+          - not_null
+      - name: trade_hour
+        description: Truncated to hour (UTC).
+        tests:
+          - not_null
+      - name: volatility_pct
+        description: Intra-hour high-low range as a percentage of the low price.
+      - name: price_change_pct
+        description: Hourly open-to-close price change percentage.
+
+  - name: int_symbol_volume
+    description: Daily volume and trade activity per symbol, combining kline and trade data via full outer join.
+    columns:
+      - name: symbol
+        tests:
+          - not_null
+      - name: trade_date
+        description: Calendar date (UTC).
+        tests:
+          - not_null
+      - name: kline_base_volume
+        description: Sum of base asset volume from klines for the day.
+      - name: trade_count
+        description: Number of individual trades captured for the day.

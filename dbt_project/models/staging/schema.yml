@@ -1,0 +1,65 @@
+version: 2
+
+models:
+  - name: stg_binance_klines
+    description: Cleaned and type-cast candlestick (OHLCV) data from Binance. One row per symbol per candle interval.
+    columns:
+      - name: symbol
+        description: Trading pair symbol.
+        tests:
+          - not_null
+      - name: open_time
+        description: Candle open timestamp (UTC).
+        tests:
+          - not_null
+      - name: close_time
+        description: Candle close timestamp (UTC).
+        tests:
+          - not_null
+      - name: open_price
+        tests:
+          - not_null
+      - name: high_price
+        tests:
+          - not_null
+      - name: low_price
+        tests:
+          - not_null
+      - name: close_price
+        tests:
+          - not_null
+      - name: volume
+        tests:
+          - not_null
+
+  - name: stg_binance_trades
+    description: Cleaned individual trade records from Binance. One row per trade per symbol.
+    columns:
+      - name: trade_id
+        description: Exchange-assigned trade ID.
+        tests:
+          - not_null
+      - name: symbol
+        tests:
+          - not_null
+      - name: price
+        tests:
+          - not_null
+      - name: qty
+        tests:
+          - not_null
+      - name: trade_time
+        description: Trade execution timestamp (UTC).
+        tests:
+          - not_null
+
+  - name: stg_binance_tickers
+    description: Cleaned 24-hour rolling ticker statistics from Binance. One row per symbol (latest snapshot).
+    columns:
+      - name: symbol
+        tests:
+          - not_null
+          - unique
+      - name: last_price
+        tests:
+          - not_null

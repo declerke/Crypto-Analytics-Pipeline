@@ -1,0 +1,48 @@
+version: 2
+
+sources:
+  - name: raw
+    database: crypto_db
+    schema: raw
+    description: Raw tables loaded directly from the Binance public REST API.
+    tables:
+      - name: raw_binance_klines
+        description: OHLCV candlestick data per symbol per interval as received from /api/v3/klines.
+        columns:
+          - name: symbol
+            description: Trading pair symbol (e.g. BTCUSDT).
+            tests:
+              - not_null
+          - name: open_time
+            description: Kline open time in milliseconds since epoch.
+            tests:
+              - not_null
+          - name: close
+            description: Closing price of the candle.
+            tests:
+              - not_null
+
+      - name: raw_binance_trades
+        description: Individual trade records per symbol as received from /api/v3/trades.
+        columns:
+          - name: trade_id
+            description: Exchange-assigned trade identifier.
+            tests:
+              - not_null
+          - name: symbol
+            tests:
+              - not_null
+          - name: price
+            tests:
+              - not_null
+
+      - name: raw_binance_tickers
+        description: 24-hour rolling ticker statistics per symbol from /api/v3/ticker/24hr.
+        columns:
+          - name: symbol
+            tests:
+              - not_null
+              - unique
+          - name: last_price
+            tests:
+              - not_null
