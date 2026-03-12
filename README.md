@@ -114,6 +114,7 @@ python scripts/ingest.py
 ### 5. Run and Test dbt Models
 ```bash
 cd dbt_project
+# Execute pip list to check if dbt-postgres is installed; if it isn't, use pip install dbt-postgres to install it.
 # Verify connection
 dbt debug
 # Build all models and run 56 data tests
