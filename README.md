@@ -84,7 +84,7 @@ The pipeline is designed to answer five core business questions:
 
 ### 1. Clone and Configure
 ```bash
-git clone <your-repo-url>
+git clone <(https://github.com/declerke/Crypto-Analytics-Pipeline/tree/main)>
 cd crypto-analytics-pipeline
 cp .env.example .env
 # Edit .env if you need to change default credentials
