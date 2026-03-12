@@ -17,7 +17,7 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 POSTGRES_HOST     = os.getenv("POSTGRES_HOST", "127.0.0.1").strip()
-POSTGRES_PORT     = os.getenv("POSTGRES_PORT", "5433").strip()
+POSTGRES_PORT     = os.getenv("POSTGRES_PORT", "5433").strip() # Change to 5433 if port 5432 is in use
 POSTGRES_DB       = os.getenv("POSTGRES_DB", "crypto_db").strip()
 POSTGRES_USER     = os.getenv("POSTGRES_USER", "crypto_user").strip()
 POSTGRES_PASSWORD = os.getenv("POSTGRES_PASSWORD", "crypto_pass").strip()
